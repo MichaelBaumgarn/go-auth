@@ -1,8 +1,14 @@
 package main
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/dgrijalva/jwt-go/v4"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -47,12 +53,17 @@ func (config Config) Login(c *gin.Context) {
 	fmt.Println("foobar")
 	fmt.Printf("user %v", user.Password)
 	fmt.Printf("user %v", incomingUser.Password)
-	if user.Password == incomingUser.Password {
-		c.IndentedJSON(http.StatusOK, &user)
-	} else {
-
+	if user.Password != incomingUser.Password {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Error: "bad password"})
 	}
+
+	var token string
+	var err error
+	if token, err = generateToken(user); err != nil {
+		c.JSON(http.StatusUnauthorized, Response{Code: 400, Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, Response{Code: 200, Data: fmt.Sprintf("Bearer %s", token)})
 }
 
 func (config Config) GetUserByID(c *gin.Context) {
@@ -61,4 +72,21 @@ func (config Config) GetUserByID(c *gin.Context) {
 	var user User
 	config.db.Find(&user, id)
 	c.IndentedJSON(http.StatusOK, user)
+}
+
+func generateToken(user User) (string, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+
+	now := time.Now()
+	expiry := time.Now().Add(time.Hour * 24 * 4)
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, JwtClaims{ID: user.ID, ExpieresAt: expiry.Unix(), IssuedAt: now.Unix()})
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		panic(err)
+	}
+
+	return tokenString, err
 }
