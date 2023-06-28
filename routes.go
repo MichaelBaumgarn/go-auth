@@ -11,35 +11,32 @@ import (
 	"github.com/dgrijalva/jwt-go/v4"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-type Config struct {
-	db *gorm.DB
+// type Config struct {
+// 	db *gorm.DB
+// }
+
+func (e Env) GetUser(c *gin.Context) {
+	users := e.users.GetAll()
+
+	c.IndentedJSON(http.StatusOK, users)
 }
 
-func (config Config) GetUser(c *gin.Context) {
-	var user User
-	config.db.Find(&user, 1)
-	c.IndentedJSON(http.StatusOK, user)
-}
-
-func (config Config) PostUser(c *gin.Context) {
+func (e Env) PostUser(c *gin.Context) {
 	var incomingUser User
 	if err := c.BindJSON(&incomingUser); err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Error: err.Error()})
 		return
 	}
-	config.db.Create(&incomingUser)
+	e.users.Create(incomingUser)
 
 	fmt.Printf("%v", &incomingUser)
 
-	var users []User
-	config.db.Model(&User{}).Find(&users)
-	c.IndentedJSON(http.StatusOK, &users)
+	c.IndentedJSON(http.StatusOK, &incomingUser)
 }
 
-func (config Config) Login(c *gin.Context) {
+func (e Env) Login(c *gin.Context) {
 	var incomingUser User
 	if err := c.BindJSON(&incomingUser); err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 400, Error: err.Error()})
@@ -47,7 +44,8 @@ func (config Config) Login(c *gin.Context) {
 	}
 
 	var user User
-	config.db.First(&user, "email = ?", &incomingUser.Email)
+	// config.db.First(&user, "email = ?", &incomingUser.Email)
+	e.users.db.First(&user, "email = ?", &incomingUser.Email)
 
 	fmt.Printf("%v %v", user.Password, incomingUser.Password)
 	fmt.Println("foobar")
@@ -66,11 +64,12 @@ func (config Config) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, Response{Code: 200, Data: fmt.Sprintf("Bearer %s", token)})
 }
 
-func (config Config) GetUserByID(c *gin.Context) {
+func (e Env) GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	fmt.Println(id)
-	var user User
-	config.db.Find(&user, id)
+	// user := UserModel{db:}.ModelGetUserByID(id, config)
+	user := e.users.GetByID(id)
+
 	c.IndentedJSON(http.StatusOK, user)
 }
 

@@ -2,12 +2,15 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
+	"gorm.io/gorm"
 )
 
 type User struct {
+	db       *gorm.DB
 	ID       uint   `gorm:"column:user_id" gorm:"primaryKey" `
 	Email    string `gorm:"unique,column:email" json:"email" binding:"required"`
 	Password string `gorm:"column:password" json:"password" binding:"required"`
@@ -28,6 +31,8 @@ type JwtClaims struct {
 	IssuedAt   int64 `json:"iat,omitempty"`
 }
 
+var DB *gorm.DB
+
 func (c JwtClaims) Valid(helper *jwt.ValidationHelper) (err error) {
 	if helper.After(time.Unix(c.ExpieresAt, 0)) {
 		err = errors.New("token has expired")
@@ -36,4 +41,22 @@ func (c JwtClaims) Valid(helper *jwt.ValidationHelper) (err error) {
 		err = errors.New("token used before issued")
 	}
 	return err
+}
+
+func (u User) GetAll() []User {
+	var users []User
+	u.db.Find(&users)
+	return users
+}
+
+func (u User) GetByID(id string) User {
+	fmt.Printf("see id %v", id)
+	var user User
+	u.db.Find(&user, id)
+	return user
+}
+
+func (u User) Create(user User) User {
+	u.db.Create(&user)
+	return user
 }

@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-// album represents data about a record album.
+type Env struct {
+	users User
+}
+
 func main() {
 	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -16,14 +19,18 @@ func main() {
 		fmt.Printf("%v", err)
 		panic("db connection failed")
 	}
-	c := Config{db: db}
+	// c := Config{db: db}
+	DB = db
+	env := &Env{
+		users: User{db: db},
+	}
 
 	router := gin.Default()
-	router.GET("/user", c.GetUser)
-	router.GET("/user/:id", c.GetUserByID)
-	router.POST("/user", c.PostUser)
+	router.GET("/user", env.GetUser)
+	router.GET("/user/:id", env.GetUserByID)
+	router.POST("/user", env.PostUser)
 
-	router.POST("/login", c.Login)
+	router.POST("/login", env.Login)
 
 	router.Run("localhost:8081")
 }
