@@ -60,3 +60,23 @@ func (u User) Create(user User) User {
 	u.db.Create(&user)
 	return user
 }
+
+func (u User) Authenticate(incomingUser User) (string, error) {
+	var user User
+	u.db.First(&user, "email = ?", &incomingUser.Email)
+
+	fmt.Printf("%v %v", user.Password, incomingUser.Password)
+	fmt.Println("foobar")
+	fmt.Printf("user %v", user.Password)
+	fmt.Printf("user %v", incomingUser.Password)
+	if user.Password != incomingUser.Password {
+		return "", errors.New("wrong password")
+	}
+
+	var token string
+	var err error
+	if token, err = generateToken(user); err != nil {
+		return "", errors.New("could not generate token")
+	}
+	return token, err
+}

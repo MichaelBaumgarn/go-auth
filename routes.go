@@ -43,21 +43,9 @@ func (e Env) Login(c *gin.Context) {
 		return
 	}
 
-	var user User
-	// config.db.First(&user, "email = ?", &incomingUser.Email)
-	e.users.db.First(&user, "email = ?", &incomingUser.Email)
-
-	fmt.Printf("%v %v", user.Password, incomingUser.Password)
-	fmt.Println("foobar")
-	fmt.Printf("user %v", user.Password)
-	fmt.Printf("user %v", incomingUser.Password)
-	if user.Password != incomingUser.Password {
-		c.JSON(http.StatusBadRequest, Response{Code: 400, Error: "bad password"})
-	}
-
 	var token string
 	var err error
-	if token, err = generateToken(user); err != nil {
+	if token, err = e.users.Authenticate(incomingUser); err != nil {
 		c.JSON(http.StatusUnauthorized, Response{Code: 400, Error: err.Error()})
 		return
 	}

@@ -32,27 +32,20 @@ func TestMain(t *testing.T) {
 	userModel.db.Delete(user)
 }
 
-// func TestLogin(t *testing.T) {
-// 	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
-// 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-// 	if err != nil {
-// 		fmt.Printf("%v", err)
-// 		panic("db connection failed")
-// 	}
-// 	env := Env{users: User{db: db}}
-// 	env.users.db.
+func TestLogin(t *testing.T) {
+	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Printf("%v", err)
+		panic("db connection failed")
+	}
+	env := Env{users: User{db: db}}
+	testEmail := "uniqueEmail"
+	newUser := env.users.Create(User{Email: testEmail, Password: "flkjsal"})
 
-// 	userModel := User{db: db}
-// 	testEmail := "testEmail"
-// 	newUser := userModel.Create(User{Email: testEmail, Password: "flkjsal"})
+	if token, err := env.users.Authenticate(newUser); err != nil || len(token) < 10 {
+		t.Errorf("no token was generated %v %v ", err, token)
+	}
 
-// 	b, err := env.Login(&gin.Context{})
-
-// 	user := userModel.GetByID(fmt.Sprint(newUser.ID))
-
-// 	if testEmail != user.Email {
-// 		t.Errorf("email should be %v, is %v", testEmail, user.Email)
-// 	}
-
-// 	userModel.db.Delete(user)
-// }
+	env.users.db.Delete(newUser, newUser.ID)
+}
