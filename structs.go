@@ -69,13 +69,14 @@ func (u User) Authenticate(incomingUser User) (string, error) {
 	fmt.Println("foobar")
 	fmt.Printf("user %v", user.Password)
 	fmt.Printf("user %v", incomingUser.Password)
+
 	if user.Password != incomingUser.Password {
 		return "", errors.New("wrong password")
 	}
 
 	var token string
 	var err error
-	if token, err = generateToken(user); err != nil {
+	if token, err = GenerateToken(user); err != nil {
 		return "", errors.New("could not generate token")
 	}
 	return token, err

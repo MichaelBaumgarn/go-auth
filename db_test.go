@@ -40,11 +40,24 @@ func TestLogin(t *testing.T) {
 		panic("db connection failed")
 	}
 	env := Env{users: User{db: db}}
-	testEmail := "uniqueEmail"
+	testEmail := "uniqueEmail123"
 	newUser := env.users.Create(User{Email: testEmail, Password: "flkjsal"})
 
-	if token, err := env.users.Authenticate(newUser); err != nil || len(token) < 10 {
-		t.Errorf("no token was generated %v %v ", err, token)
+	if _token, err := env.users.Authenticate(newUser); err != nil || len(_token) < 10 {
+		t.Errorf("no token was generated %v %v ", err, _token)
+	}
+
+	token, err := GenerateToken(newUser)
+	if err != nil {
+		t.Errorf("alaram %v %v ", err, token)
+	}
+	fmt.Printf("token %v", token)
+
+	if claim, err := ParseToken(token, TokenSecret); err != nil {
+		t.Errorf("no token was generated %v %v ", err, claim)
+	} else {
+		fmt.Printf("show claim %v", claim)
+
 	}
 
 	env.users.db.Delete(newUser, newUser.ID)
