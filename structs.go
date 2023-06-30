@@ -9,6 +9,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type Env struct {
+	users User
+}
+
 type User struct {
 	db       *gorm.DB
 	ID       uint   `gorm:"column:user_id" gorm:"primaryKey" `
