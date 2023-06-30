@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 
-	"example/web-service-gin/foo"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,15 +13,13 @@ type Env struct {
 }
 
 func main() {
-	foo.TGo()
 	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Printf("%v", err)
 		panic("db connection failed")
 	}
-	// c := Config{db: db}
-	DB = db
+
 	env := &Env{
 		users: User{db: db},
 	}
