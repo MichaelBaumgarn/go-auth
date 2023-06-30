@@ -8,38 +8,34 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestMain(t *testing.T) {
-	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
+var env Env
+
+func init() {
+	dsn := "host=localhost dbname=vocab_test port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Printf("%v", err)
 		panic("db connection failed")
 	}
-	// env := Env{users: User{db: db}}
-	// env.GetUser(&gin.Context{})
 
-	userModel := User{db: db}
+	env = Env{users: User{db: db}}
+}
+
+func TestMain(t *testing.T) {
 	testEmail := "testEmail"
-	newUser := userModel.Create(User{Email: testEmail, Password: "flkjsal"})
+	newUser := env.users.Create(User{Email: testEmail, Password: "flkjsal"})
 	fmt.Printf("check newUser %v", newUser.ID)
 
-	user := userModel.GetByID(fmt.Sprint(newUser.ID))
+	user := env.users.GetByID(fmt.Sprint(newUser.ID))
 
 	if testEmail != user.Email {
 		t.Errorf("email should be %v, is %v", testEmail, user.Email)
 	}
 
-	userModel.db.Delete(user)
+	env.users.db.Delete(user, user.ID)
 }
 
 func TestLogin(t *testing.T) {
-	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		fmt.Printf("%v", err)
-		panic("db connection failed")
-	}
-	env := Env{users: User{db: db}}
 	testEmail := "uniqueEmail123"
 	newUser := env.users.Create(User{Email: testEmail, Password: "flkjsal"})
 
