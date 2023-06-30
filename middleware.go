@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go/v4"
@@ -11,10 +12,17 @@ import (
 func AuthMiddleware(c *gin.Context) {
 	token := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	if token == "" {
-		// not auth
+		c.Set(IsAuthenticatedKey, false)
 		c.Next()
+		return
 	}
-	// claims, err := parseToken(token)
+	claims, err := ParseToken(token, TokenSecret)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, Response{Code: 400, Error: err.Error()})
+	}
+	c.Set(IsAuthenticatedKey, true)
+	c.Set(UserIDKey, claims.ID)
+	c.Next()
 }
 
 func ParseToken(tokenString, secret string) (claims JwtClaims, err error) {

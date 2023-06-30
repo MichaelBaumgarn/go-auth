@@ -16,3 +16,8 @@ var TokenSecret = `-----BEGIN RSA PRIVATE KEY-----
  7XhQmFRX1XSNoqmKAjhO8QJAeXoILM1hmgxXjwGy9wAldyS6QwABxiJHHVYRKxdG
  Y5gW3mgEMMk8dvRLr0vL3xKdAeaPbF8MNVzGlo09pyPgeQ==
  -----END RSA PRIVATE KEY-----`
+
+const (
+	IsAuthenticatedKey = ""
+	UserIDKey          = ""
+)

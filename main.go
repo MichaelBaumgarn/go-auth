@@ -25,6 +25,10 @@ func main() {
 	}
 
 	router := gin.Default()
+	// router.Use(
+	// 	AuthMiddleware,
+	// )
+
 	router.GET("/user", env.GetUser)
 	router.GET("/user/:id", env.GetUserByID)
 	router.POST("/user", env.PostUser)
@@ -32,4 +36,5 @@ func main() {
 	router.POST("/login", env.Login)
 
 	router.Run("localhost:8081")
+
 }
