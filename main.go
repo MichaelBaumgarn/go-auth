@@ -10,6 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type Env struct {
+	users User
+}
+
 func main() {
 	foo.TGo()
 	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
