@@ -50,3 +50,9 @@ func (e Env) GetUserByID(c *gin.Context) {
 
 	c.IndentedJSON(http.StatusOK, user)
 }
+
+func (e Env) GetAllGrammar(c *gin.Context) {
+	grammar := e.grammar.GetAll()
+	c.IndentedJSON(http.StatusOK, grammar)
+
+}

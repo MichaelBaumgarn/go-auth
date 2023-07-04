@@ -9,7 +9,8 @@ import (
 )
 
 type Env struct {
-	users User
+	users   User
+	grammar Grammar
 }
 
 func main() {
@@ -21,7 +22,8 @@ func main() {
 	}
 
 	env := &Env{
-		users: User{db: db},
+		users:   User{db: db},
+		grammar: Grammar{db: db},
 	}
 
 	router := gin.Default()
@@ -34,6 +36,8 @@ func main() {
 	router.POST("/user", env.PostUser)
 
 	router.POST("/login", env.Login)
+
+	router.GET("/grammar", env.GetAllGrammar)
 
 	router.Run("localhost:8081")
 
