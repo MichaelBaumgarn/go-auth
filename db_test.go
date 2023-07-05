@@ -18,7 +18,7 @@ func init() {
 		panic("db connection failed")
 	}
 
-	env = Env{users: User{db: db}}
+	env = Env{users: User{db: db}, grammar: Grammar{db: db}, userGrammar: UserGrammar{db: db}}
 }
 
 func TestMain(t *testing.T) {
@@ -57,4 +57,42 @@ func TestLogin(t *testing.T) {
 	}
 
 	env.users.db.Delete(newUser, newUser.ID)
+}
+
+func TestGrammar(t *testing.T) {
+	type Result struct {
+		Word     string
+		Email    string
+		Complete string
+	}
+	testEmail := "uniqueEmail123"
+	newUser := env.users.Create(User{Email: testEmail, Password: "flkjsal"})
+	fmt.Printf("show %v", newUser)
+
+	newGrammar := env.grammar.Create(Grammar{
+		Language: "english",
+		Index:    0,
+		Word:     "ran",
+		Complete: "somewhat",
+	})
+	newUserGrammar := env.userGrammar.Create(UserGrammar{
+		UserId:    int(newUser.ID),
+		GrammarId: int(newGrammar.ID),
+	})
+	fmt.Printf("newUserGrammar %v\n ", newUserGrammar)
+
+	var result Result
+	userGrammarQuery := `
+		join users on users.user_id = user_grammar.user_id 
+		join grammar on grammar.grammar_id = user_grammar.grammar_id`
+	env.userGrammar.db.Model(UserGrammar{}).Select("word, complete, email").Joins(userGrammarQuery).Scan(&result)
+	fmt.Printf("final result  %v", result)
+	if result.Email != newUser.Email || result.Word != newGrammar.Word {
+
+		t.Errorf("final result %v  ", result)
+	}
+
+	env.users.db.Delete(newUser, newUser.ID)
+	env.grammar.db.Delete(newGrammar, newGrammar.ID)
+	env.userGrammar.db.Delete(newUserGrammar, newUserGrammar.ID)
 }

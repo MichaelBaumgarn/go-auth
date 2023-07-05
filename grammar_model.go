@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Grammar struct {
 	db       *gorm.DB
-	ID       uint   `gorm:"column:grammar_id, primaryKey"`
+	ID       uint   `gorm:"column:grammar_id" gorm:"primaryKey"`
 	Language string `gorm:"column:language" json:"langauge" binding:"required"`
 	Index    int    `gorm:"column:index" json:"index" binding:"required"`
 	Word     string `gorm:"column:word" json:"word" binding:"required"`
@@ -15,9 +15,13 @@ type Tabler interface {
 	TableName() string
 }
 
-// TableName overrides the table name used by User to `profiles`
 func (Grammar) TableName() string {
 	return "grammar"
+}
+
+func (m Grammar) Create(grammar Grammar) Grammar {
+	m.db.Create(&grammar)
+	return grammar
 }
 
 func (m Grammar) GetAll() []Grammar {

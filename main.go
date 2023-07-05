@@ -9,8 +9,9 @@ import (
 )
 
 type Env struct {
-	users   User
-	grammar Grammar
+	users       User
+	grammar     Grammar
+	userGrammar UserGrammar
 }
 
 func main() {
@@ -22,8 +23,9 @@ func main() {
 	}
 
 	env := &Env{
-		users:   User{db: db},
-		grammar: Grammar{db: db},
+		users:       User{db: db},
+		grammar:     Grammar{db: db},
+		userGrammar: UserGrammar{db: db},
 	}
 
 	router := gin.Default()
