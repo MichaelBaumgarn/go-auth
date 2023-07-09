@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"gorm.io/driver/postgres"
@@ -95,4 +98,28 @@ func TestGrammar(t *testing.T) {
 	env.users.db.Delete(newUser, newUser.ID)
 	env.grammar.db.Delete(newGrammar, newGrammar.ID)
 	env.userGrammar.db.Delete(newUserGrammar, newUserGrammar.ID)
+}
+
+func TestHttpUserRoute(t *testing.T) {
+	router := SetupRouter(env)
+
+	w := httptest.NewRecorder()
+	createdUser := &User{Email: "foobar", Password: "123"}
+	env.users.db.Create(createdUser)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/user/%v", createdUser.ID), nil)
+	router.ServeHTTP(w, req)
+	fmt.Printf("check out %v", w.Body.String())
+	if w.Code != 200 {
+		t.Errorf("wrong response")
+	}
+
+	var responseUser User
+	if err := json.NewDecoder(w.Body).Decode(&responseUser); err != nil {
+		t.Errorf("error decoding")
+	}
+	fmt.Printf("responseUser %v", responseUser)
+	t.Errorf("error decoding")
+	if responseUser.Email != createdUser.Email {
+		t.Errorf("wrong email")
+	}
 }

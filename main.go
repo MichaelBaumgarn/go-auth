@@ -14,25 +14,8 @@ type Env struct {
 	userGrammar UserGrammar
 }
 
-func main() {
-	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		fmt.Printf("%v", err)
-		panic("db connection failed")
-	}
-
-	env := &Env{
-		users:       User{db: db},
-		grammar:     Grammar{db: db},
-		userGrammar: UserGrammar{db: db},
-	}
-
+func SetupRouter(env Env) *gin.Engine {
 	router := gin.Default()
-	// router.Use(
-	// 	AuthMiddleware,
-	// )
-
 	router.GET("/user", env.GetUser)
 	router.GET("/user/:id", env.GetUserByID)
 	router.POST("/user", env.PostUser)
@@ -42,5 +25,24 @@ func main() {
 	router.GET("/grammar", env.GetAllGrammar)
 
 	router.Run("localhost:8081")
+	return router
+}
+
+func main() {
+	dsn := "host=localhost dbname=vocab port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		fmt.Printf("%v", err)
+		panic("db connection failed")
+	}
+
+	SetupRouter(Env{
+		users:       User{db: db},
+		grammar:     Grammar{db: db},
+		userGrammar: UserGrammar{db: db},
+	})
+	// router.Use(
+	// 	AuthMiddleware,
+	// )
 
 }
